@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>返済スケジュール</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='8' y='8' width='112' height='112' rx='25' fill='%232c3e50'/%3E%3Crect x='32' y='76' width='16' height='24' rx='4' fill='%238ba888'/%3E%3Crect x='56' y='60' width='16' height='40' rx='4' fill='%238ba888'/%3E%3Crect x='80' y='44' width='16' height='56' rx='4' fill='%238ba888'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="返済スケジュール">
+<meta name="theme-color" content="#2c3e50">
+<style>
+  :root {
+    --navy: #2c3e50;
+    --navy-light: #46617a;
+    --sage: #8ba888;
+    --sage-light: #eaf0e8;
+    --coral: #d9764a;
+    --coral-light: #fbe9e0;
+    --gold: #c9a227;
+    --gold-light: #f7edc9;
+    --cream: #f5f1e8;
+    --cream-dark: #ece5d5;
+    --ink: #2c2a26;
+    --line: #ddd4c0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--cream); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { padding: 8px 2px 16px; border-bottom: 2px solid var(--navy); margin-bottom: 20px; }
+  header h1 { font-size: 21px; margin: 0; color: var(--navy); letter-spacing: 0.02em; }
+
+  section { margin-bottom: 18px; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--cream-dark); border-bottom: 1px solid var(--line); }
+  .section-head h2 { font-size: 14.5px; margin: 0; color: var(--navy); }
+  .section-body { padding: 14px; }
+
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .field-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .field-row:last-child { margin-bottom: 0; }
+  .field-row label { font-size: 12.5px; color: var(--navy); flex: 1; }
+  .field-row input {
+    flex: none; width: 140px; border: none; background: var(--cream); border-radius: 6px;
+    font-size: 14px; font-weight: 600; padding: 8px 8px; text-align: right; color: var(--navy);
+    font-variant-numeric: tabular-nums; font-family: inherit;
+  }
+  .field-row input:focus { outline: 1px solid var(--navy-light); }
+  .field-row .unit { font-size: 12px; color: #8a8272; flex-shrink: 0; }
+
+  .empty-note { font-size: 12px; color: #8a8272; line-height: 1.6; padding: 2px 2px 0; }
+
+  .summary { background: var(--navy); color: var(--cream); border-radius: 10px; padding: 18px 16px; }
+  .summary .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .summary-box { background: rgba(245,241,232,0.08); border-radius: 8px; padding: 10px 12px; text-align: center; }
+  .summary-box .label { font-size: 11px; color: rgba(245,241,232,0.68); margin-bottom: 4px; }
+  .summary-box .value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gold-light); }
+  .progress-note { font-size: 12px; color: rgba(245,241,232,0.8); text-align: center; }
+
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.hensai { border-collapse: collapse; width: 100%; min-width: 100%; font-size: 12.5px; }
+  table.hensai th, table.hensai td { padding: 8px 6px; text-align: right; white-space: nowrap; border-bottom: 1px solid #f0ece1; }
+  table.hensai th { font-size: 10.5px; color: var(--navy-light); font-weight: 700; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; }
+  table.hensai td.col-date, table.hensai th.col-date { text-align: left; }
+  table.hensai th.col-check, table.hensai td.col-check { text-align: center; width: 28px; }
+  table.hensai tr.paid td { color: #c2b9a3; text-decoration: line-through; }
+  .paid-check { width: 18px; height: 18px; }
+  .pay-cell { color: var(--navy-light); text-decoration: underline dashed; text-underline-offset: 3px; cursor: pointer; }
+  .pay-cell.override { font-weight: 700; color: var(--gold); }
+  .override-badge { font-size: 9px; color: #fff; background: var(--gold); border-radius: 4px; padding: 1px 4px; margin-left: 4px; text-decoration: none; display: inline-block; }
+  tr.paid .override-badge { background: #c2b9a3; }
+
+  .reset-btn {
+    display: block; width: 100%; margin-top: 10px; padding: 9px;
+    border: 1px dashed var(--line); border-radius: 8px; background: none;
+    color: var(--navy-light); font-size: 12.5px; cursor: pointer;
+  }
+  .reset-btn:hover { background: var(--cream); }
+
+  footer { text-align: center; font-size: 11px; color: #a89f8a; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header><h1>返済スケジュール</h1></header>
+
+  <section>
+    <div class="section-head"><h2>借入情報</h2></div>
+    <div class="section-body">
+      <div class="field-row">
+        <label>借入残高</label>
+        <input id="principal" type="number" inputmode="numeric" placeholder="0">
+        <span class="unit">円</span>
+      </div>
+      <div class="field-row">
+        <label>月々の返済額</label>
+        <input id="monthly" type="number" inputmode="numeric" placeholder="0">
+        <span class="unit">円</span>
+      </div>
+      <div class="field-row">
+        <label>返済開始月</label>
+        <input id="startMonth" type="month">
+      </div>
+      <div class="empty-note" id="inputHint">借入残高と月々の返済額を入力すると、下に完済予定とスケジュールが表示されます</div>
+    </div>
+  </section>
+
+  <div id="resultWrap" style="display:none;">
+    <section>
+      <div class="section-body">
+        <div class="summary">
+          <div class="row2">
+            <div class="summary-box">
+              <div class="label">完済まで</div>
+              <div class="value" id="months">-</div>
+            </div>
+            <div class="summary-box">
+              <div class="label">完済予定</div>
+              <div class="value" id="finishDate">-</div>
+            </div>
+          </div>
+          <div class="progress-note" id="paidProgress"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>返済スケジュール</h2></div>
+      <div class="section-body">
+        <div class="table-wrap">
+          <table class="hensai">
+            <thead>
+              <tr><th class="col-check">済</th><th class="col-date">年月</th><th>返済額</th><th>残高</th></tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-note" style="margin-top:10px;">チェックで支払い済みを記録／返済額はタップして直接編集できます（その月だけ増額・減額）</div>
+        <button class="reset-btn" id="resetBtn">個別入力をリセット</button>
+      </div>
+    </section>
+  </div>
+
+  <footer>返済スケジュール ・ すべてのデータはこの端末内に保存されます</footer>
+
+</div>
+
+<script>
+const ids = ["principal","monthly","startMonth"];
+let overrides = {};
+let paidMonths = {};
+
+function storageGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function storageSet(key, value){ try{ localStorage.setItem(key, value); }catch(e){} }
+
+function loadOverrides(){ const raw = storageGet("repayOverrides"); overrides = raw ? JSON.parse(raw) : {}; }
+function saveOverrides(){ saveGeneric("repayOverrides", overrides); }
+function loadPaid(){ const raw = storageGet("repayPaid"); paidMonths = raw ? JSON.parse(raw) : {}; }
+function savePaid(){ saveGeneric("repayPaid", paidMonths); }
+function saveGeneric(key, obj){ storageSet(key, JSON.stringify(obj)); }
+
+function save(){
+  const data = {};
+  ids.forEach(id => data[id] = document.getElementById(id).value);
+  storageSet("repaySchedule", JSON.stringify(data));
+}
+
+function load(){
+  const raw = storageGet("repaySchedule");
+  if(raw){
+    const data = JSON.parse(raw);
+    ids.forEach(id => { if(data[id]) document.getElementById(id).value = data[id]; });
+  }
+  if(!document.getElementById("startMonth").value){
+    const now = new Date();
+    document.getElementById("startMonth").value =
+      now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0");
+  }
+}
+
+function calc(){
+  save();
+
+  let balance = parseFloat(document.getElementById("principal").value) || 0;
+  const monthly = parseFloat(document.getElementById("monthly").value) || 0;
+  const startVal = document.getElementById("startMonth").value;
+
+  if(balance <= 0 || monthly <= 0){
+    document.getElementById("resultWrap").style.display = "none";
+    return;
+  }
+
+  let startDate;
+  if(startVal){
+    const [y,m] = startVal.split("-").map(Number);
+    startDate = new Date(y, m-1, 1);
+  } else {
+    startDate = new Date();
+  }
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+  let count = 0;
+  const maxRows = 600;
+
+  while(balance > 0 && count < maxRows){
+    count++;
+    const d = new Date(startDate.getFullYear(), startDate.getMonth() + count - 1, 1);
+    const key = `${d.getFullYear()}-${d.getMonth()+1}`;
+    const dateLabel = `${d.getFullYear()}年${d.getMonth()+1}月`;
+
+    const isOverride = overrides.hasOwnProperty(key);
+    let payment = isOverride ? parseFloat(overrides[key]) : monthly;
+    if(payment >= balance){ payment = balance; }
+    balance = Math.round((balance - payment) * 100) / 100;
+
+    const isPaid = !!paidMonths[key];
+    const tr = document.createElement("tr");
+    if(isPaid) tr.classList.add("paid");
+    tr.innerHTML = `
+      <td class="col-check"><input type="checkbox" class="paid-check" data-key="${key}" ${isPaid ? "checked" : ""}></td>
+      <td class="col-date">${dateLabel}</td>
+      <td class="pay-cell${isOverride ? " override" : ""}" data-key="${key}">${Math.round(payment).toLocaleString()}${isOverride ? '<span class="override-badge">変更</span>' : ""}</td>
+      <td>${Math.round(balance).toLocaleString()}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  tbody.querySelectorAll(".paid-check").forEach(box => {
+    box.addEventListener("click", (e) => e.stopPropagation());
+    box.addEventListener("change", () => {
+      const key = box.dataset.key;
+      if(box.checked){ paidMonths[key] = true; } else { delete paidMonths[key]; }
+      savePaid();
+      updateProgress();
+      box.closest("tr").classList.toggle("paid", box.checked);
+    });
+  });
+
+  tbody.querySelectorAll(".pay-cell").forEach(cell => {
+    cell.addEventListener("click", () => {
+      const key = cell.dataset.key;
+      const current = overrides[key] || "";
+      const input = prompt("この月の返済額を入力(空欄で通常額に戻す)", current);
+      if(input === null) return;
+      const trimmed = input.trim();
+      if(trimmed === ""){
+        delete overrides[key];
+      } else {
+        const num = parseFloat(trimmed);
+        if(isNaN(num) || num <= 0){ alert("正しい金額を入力してください"); return; }
+        overrides[key] = num;
+      }
+      saveOverrides();
+      calc();
+    });
+  });
+
+  const finishDate = new Date(startDate.getFullYear(), startDate.getMonth() + count - 1, 1);
+  document.getElementById("months").textContent = count + "ヶ月";
+  document.getElementById("finishDate").textContent =
+    `${finishDate.getFullYear()}年${finishDate.getMonth()+1}月`;
+
+  document.getElementById("resultWrap").style.display = "block";
+  updateProgress(count);
+}
+
+function updateProgress(totalOverride){
+  const rows = document.querySelectorAll("#tbody tr");
+  const total = totalOverride || rows.length;
+  const paidCount = document.querySelectorAll("#tbody tr.paid").length;
+  document.getElementById("paidProgress").textContent = `支払い済み ${paidCount} / ${total} ヶ月`;
+}
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(!confirm("月ごとに変更した返済額をすべて元に戻します。よろしいですか?")) return;
+  overrides = {};
+  saveOverrides();
+  calc();
+});
+
+ids.forEach(id=>{
+  document.getElementById(id).addEventListener("input", calc);
+  document.getElementById(id).addEventListener("change", calc);
+});
+
+load();
+loadOverrides();
+loadPaid();
+calc();
+</script>
+</body>
+</html>
