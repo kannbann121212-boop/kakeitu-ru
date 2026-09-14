@@ -25,10 +25,8 @@
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    padding: 0;
-    background: var(--cream);
-    color: var(--ink);
+    margin: 0; padding: 0;
+    background: var(--cream); color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -42,45 +40,67 @@
   .section-head .note { font-size: 11px; color: #8a8272; }
   .section-body { padding: 14px; }
 
+  .subhead {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12.5px; font-weight: 700; color: var(--navy);
+    margin: 4px 0 8px;
+  }
+  .subhead:not(:first-child) { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
+  .subhead .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .subhead .dot.cash { background: var(--gold); }
+  .subhead .dot.stock { background: var(--sage); }
+
   input[type="number"] { -moz-appearance: textfield; }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-  .field-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .field-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .field-row:last-child { margin-bottom: 0; }
-  .field-row label { font-size: 12.5px; color: var(--navy); flex: 1; }
+  .field-row label { font-size: 12.5px; color: var(--navy-light); flex: 1; }
   .field-row .unit { font-size: 12px; color: #8a8272; flex-shrink: 0; }
   .field-row input[type="number"] {
-    flex: none; width: 110px; border: none; background: var(--cream); border-radius: 6px;
+    flex: none; width: 108px; border: none; background: var(--cream); border-radius: 6px;
     font-size: 14px; font-weight: 600; padding: 8px 8px; text-align: right; color: var(--navy);
     font-variant-numeric: tabular-nums;
   }
   .field-row input[type="number"]:focus { outline: 1px solid var(--navy-light); }
 
-  .chart-wrap { margin: 4px 0 10px; }
+  .shared-row { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
+
+  .chart-wrap { margin: 4px 0 4px; }
   .chart-wrap svg { width: 100%; height: auto; display: block; }
   .chart-ticks { display: flex; justify-content: space-between; font-size: 10.5px; color: #a89f8a; margin-top: 2px; }
+  .chart-legend { display: flex; gap: 14px; justify-content: center; margin: 8px 0 6px; font-size: 11.5px; color: var(--navy); }
+  .chart-legend span { display: flex; align-items: center; gap: 5px; }
+  .chart-legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .chart-legend .dot.cash { background: var(--gold); }
+  .chart-legend .dot.stock { background: var(--sage); }
+  .chart-legend .dot.total { background: var(--navy); }
 
   .summary { background: var(--navy); color: var(--cream); border-radius: 10px; padding: 16px 14px; margin: -14px -14px 14px; }
-  .summary .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .summary .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
   .summary-box { background: rgba(245,241,232,0.08); border-radius: 8px; padding: 10px 12px; }
   .summary-box .label { font-size: 11px; color: rgba(245,241,232,0.68); margin-bottom: 4px; }
   .summary-box .value { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .summary-box .value.minus { color: #f0a184; }
   .summary-box .value.plus { color: var(--gold-light); }
+  .breakdown-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; color: rgba(245,241,232,0.85); }
+  .breakdown-row .bname { display: flex; align-items: center; gap: 5px; }
+  .breakdown-row .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .breakdown-row .dot.cash { background: var(--gold); }
+  .breakdown-row .dot.stock { background: var(--sage); }
 
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   table.suii { border-collapse: collapse; width: 100%; min-width: 100%; font-size: 11.5px; }
-  table.suii th, table.suii td { padding: 7px 6px; text-align: right; white-space: nowrap; border-bottom: 1px solid #f0ece1; }
-  table.suii th { font-size: 10.5px; color: var(--navy-light); font-weight: 700; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; }
+  table.suii th, table.suii td { padding: 7px 5px; text-align: right; white-space: nowrap; border-bottom: 1px solid #f0ece1; }
+  table.suii th { font-size: 10px; color: var(--navy-light); font-weight: 700; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; }
   table.suii td.col-year, table.suii th.col-year { text-align: left; font-weight: 700; color: var(--navy); }
-  table.suii td.col-event, table.suii th.col-event { text-align: left; white-space: normal; color: var(--coral); font-weight: 600; min-width: 100px; }
+  table.suii td.col-event, table.suii th.col-event { text-align: left; white-space: normal; color: var(--coral); font-weight: 600; min-width: 90px; }
   table.suii tr.is-current td { background: var(--gold-light); }
   table.suii tr.is-current td.col-year { color: var(--gold); }
-  table.suii td.col-assets.minus { color: var(--coral); }
+  table.suii td.minus { color: var(--coral); }
 
   .legend-note { font-size: 11px; color: #8a8272; text-align: center; margin-top: 10px; line-height: 1.7; }
-  .empty-note { font-size: 12px; color: #8a8272; line-height: 1.6; margin-top: 8px; }
 
   footer { text-align: center; font-size: 11px; color: #a89f8a; margin-top: 24px; }
 </style>
@@ -93,22 +113,42 @@
   <section>
     <div class="section-head"><h2>現在の資産とペース</h2></div>
     <div class="section-body">
+
+      <div class="subhead"><span class="dot cash"></span>現金（積立貯蓄）</div>
       <div class="field-row">
-        <label>現在の資産</label>
-        <input type="number" inputmode="numeric" id="currentAssetsInput" placeholder="例: 3000000">
+        <label>現在の残高</label>
+        <input type="number" inputmode="numeric" id="cashAssetsInput" placeholder="例: 2000000">
         <span class="unit">円</span>
       </div>
       <div class="field-row">
-        <label>毎年の積立・投資額</label>
-        <input type="number" inputmode="numeric" id="annualContribInput" placeholder="例: 600000">
+        <label>毎年の積立額</label>
+        <input type="number" inputmode="numeric" id="cashContribInput" placeholder="例: 300000">
+        <span class="unit">円/年</span>
+      </div>
+      <div class="field-row">
+        <label>想定利率</label>
+        <input type="number" inputmode="numeric" id="cashRateInput" step="0.1" placeholder="例: 0.1">
+        <span class="unit">%</span>
+      </div>
+
+      <div class="subhead"><span class="dot stock"></span>株式（投資）</div>
+      <div class="field-row">
+        <label>現在の評価額</label>
+        <input type="number" inputmode="numeric" id="stockAssetsInput" placeholder="例: 1000000">
+        <span class="unit">円</span>
+      </div>
+      <div class="field-row">
+        <label>毎年の投資額</label>
+        <input type="number" inputmode="numeric" id="stockContribInput" placeholder="例: 300000">
         <span class="unit">円/年</span>
       </div>
       <div class="field-row">
         <label>想定年利</label>
-        <input type="number" inputmode="numeric" id="annualRateInput" step="0.1" placeholder="例: 3">
+        <input type="number" inputmode="numeric" id="stockRateInput" step="0.1" placeholder="例: 5">
         <span class="unit">%</span>
       </div>
-      <div class="field-row">
+
+      <div class="field-row shared-row">
         <label>表示年数</label>
         <input type="number" inputmode="numeric" id="simYearsInput" min="1" max="60">
         <span class="unit">年</span>
@@ -125,7 +165,7 @@
       <div class="summary">
         <div class="row2">
           <div class="summary-box">
-            <div class="label">現在の資産</div>
+            <div class="label">現在の資産（合計）</div>
             <div class="value" id="sumStart">¥0</div>
           </div>
           <div class="summary-box">
@@ -133,13 +173,20 @@
             <div class="value" id="sumEnd">¥0</div>
           </div>
         </div>
+        <div class="breakdown-row"><span class="bname"><span class="dot cash"></span>現金</span><span id="bStart">¥0 → ¥0</span></div>
+        <div class="breakdown-row"><span class="bname"><span class="dot stock"></span>株式</span><span id="bStock">¥0 → ¥0</span></div>
+      </div>
+      <div class="chart-legend">
+        <span><span class="dot cash"></span>現金</span>
+        <span><span class="dot stock"></span>株式</span>
+        <span><span class="dot total"></span>合計</span>
       </div>
       <div class="chart-wrap" id="chartWrap"></div>
       <div class="chart-ticks" id="chartTicks"></div>
       <div class="table-wrap">
         <table class="suii" id="suiiTable"></table>
       </div>
-      <div class="legend-note">金色の行は今年です／家族年表で入力したイベントの金額を年ごとに反映します</div>
+      <div class="legend-note">金色の行は今年です／家族年表で入力したイベントの金額は現金の残高に反映します</div>
     </div>
   </section>
 
@@ -148,13 +195,13 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'shisan-suii-v1';
+const STORAGE_KEY = 'shisan-suii-v2';
+const OLD_KEY_V1 = 'shisan-suii-v1';
 const NENPYO_KEY = 'kazoku-nenpyo-v2';
 
 const defaultData = {
-  currentAssets: '',
-  annualContrib: '',
-  annualRate: '',
+  cashAssets: '', cashContrib: '', cashRate: '',
+  stockAssets: '', stockContrib: '', stockRate: '',
   simYears: 30
 };
 
@@ -163,13 +210,25 @@ let data = loadData();
 function loadData(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return {...defaultData};
-    return {...defaultData, ...JSON.parse(raw)};
-  }catch(e){ return {...defaultData}; }
+    if(raw) return {...defaultData, ...JSON.parse(raw)};
+  }catch(e){}
+  // v1(単一資産)からの移行: 全額を現金側に引き継ぐ
+  try{
+    const rawOld = localStorage.getItem(OLD_KEY_V1);
+    if(rawOld){
+      const old = JSON.parse(rawOld);
+      return {
+        ...defaultData,
+        cashAssets: old.currentAssets ?? '',
+        cashContrib: old.annualContrib ?? '',
+        cashRate: old.annualRate ?? '',
+        simYears: old.simYears ?? 30
+      };
+    }
+  }catch(e){}
+  return {...defaultData};
 }
-function saveData(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){ console.error(e); }
-}
+function saveData(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){} }
 
 function loadEvents(){
   try{
@@ -188,9 +247,12 @@ function yen(n){
 function escapeHtml(str){ const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
 
 function computeProjection(){
-  const start = parseFloat(data.currentAssets) || 0;
-  const contrib = parseFloat(data.annualContrib) || 0;
-  const rate = (parseFloat(data.annualRate) || 0) / 100;
+  const cashStart = parseFloat(data.cashAssets) || 0;
+  const cashContrib = parseFloat(data.cashContrib) || 0;
+  const cashRate = (parseFloat(data.cashRate) || 0) / 100;
+  const stockStart = parseFloat(data.stockAssets) || 0;
+  const stockContrib = parseFloat(data.stockContrib) || 0;
+  const stockRate = (parseFloat(data.stockRate) || 0) / 100;
   const years = Math.max(1, Math.min(60, parseInt(data.simYears) || 30));
   const events = loadEvents();
 
@@ -199,34 +261,42 @@ function computeProjection(){
   }
 
   const rows = [];
-  let assets = start + eventsForOffset(0).reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
-  rows.push({ offset:0, assets, events: eventsForOffset(0) });
+  let cash = cashStart + eventsForOffset(0).reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  let stock = stockStart;
+  rows.push({ offset:0, cash, stock, total: cash+stock, events: eventsForOffset(0) });
 
   for(let offset=1; offset<=years; offset++){
     const evs = eventsForOffset(offset);
-    assets = assets*(1+rate) + contrib + evs.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
-    rows.push({ offset, assets, events: evs });
+    cash = cash*(1+cashRate) + cashContrib + evs.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+    stock = stock*(1+stockRate) + stockContrib;
+    rows.push({ offset, cash, stock, total: cash+stock, events: evs });
   }
   return rows;
 }
 
 function renderChart(rows){
-  const W = 320, H = 140, padL = 4, padR = 4, padT = 10, padB = 10;
-  const vals = rows.map(r=>r.assets);
-  let min = Math.min(...vals, 0);
-  let max = Math.max(...vals, 0);
+  const W = 320, H = 150, padL = 4, padR = 4, padT = 10, padB = 10;
+  const allVals = rows.flatMap(r=>[r.cash, r.stock, r.total]);
+  let min = Math.min(...allVals, 0);
+  let max = Math.max(...allVals, 0);
   if(min === max){ min -= 1; max += 1; }
   const spanX = W - padL - padR;
   const spanY = H - padT - padB;
 
-  const pts = rows.map((r,i)=>{
-    const x = padL + (spanX * i / (rows.length-1));
-    const y = padT + spanY - ((r.assets - min) / (max - min)) * spanY;
-    return [x,y];
-  });
+  function toPts(key){
+    return rows.map((r,i)=>{
+      const x = padL + (spanX * i / (rows.length-1));
+      const y = padT + spanY - ((r[key] - min) / (max - min)) * spanY;
+      return [x,y];
+    });
+  }
+  function toPath(pts){
+    return pts.map((p,i)=> (i===0?'M':'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  }
 
-  const pathD = pts.map((p,i)=> (i===0?'M':'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-  const areaD = pathD + ` L${pts[pts.length-1][0].toFixed(1)} ${(padT+spanY).toFixed(1)} L${pts[0][0].toFixed(1)} ${(padT+spanY).toFixed(1)} Z`;
+  const cashPts = toPts('cash');
+  const stockPts = toPts('stock');
+  const totalPts = toPts('total');
 
   let zeroLine = '';
   if(min < 0 && max > 0){
@@ -235,11 +305,12 @@ function renderChart(rows){
   }
 
   const svg = `<svg viewBox="0 0 ${W} ${H}" role="img"><title>資産推移グラフ</title>
-    <path d="${areaD}" fill="#c9a22722"/>
     ${zeroLine}
-    <path d="${pathD}" fill="none" stroke="#c9a227" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${pts[0][0].toFixed(1)}" cy="${pts[0][1].toFixed(1)}" r="3" fill="#2c3e50"/>
-    <circle cx="${pts[pts.length-1][0].toFixed(1)}" cy="${pts[pts.length-1][1].toFixed(1)}" r="3" fill="#2c3e50"/>
+    <path d="${toPath(cashPts)}" fill="none" stroke="#c9a227" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${toPath(stockPts)}" fill="none" stroke="#8ba888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${toPath(totalPts)}" fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${totalPts[0][0].toFixed(1)}" cy="${totalPts[0][1].toFixed(1)}" r="3" fill="#2c3e50"/>
+    <circle cx="${totalPts[totalPts.length-1][0].toFixed(1)}" cy="${totalPts[totalPts.length-1][1].toFixed(1)}" r="3" fill="#2c3e50"/>
   </svg>`;
   document.getElementById('chartWrap').innerHTML = svg;
 
@@ -253,7 +324,7 @@ function renderChart(rows){
 function renderTable(rows){
   const baseYear = new Date().getFullYear();
   const table = document.getElementById('suiiTable');
-  let thead = '<thead><tr><th class="col-year">年</th><th>資産</th><th class="col-event">できごと</th></tr></thead>';
+  let thead = '<thead><tr><th class="col-year">年</th><th>現金</th><th>株式</th><th>合計</th><th class="col-event">できごと</th></tr></thead>';
   let tbody = '<tbody>';
   rows.forEach(r=>{
     const year = baseYear + r.offset;
@@ -261,7 +332,9 @@ function renderTable(rows){
     const eventNames = r.events.map(e=>escapeHtml(e.name)).join('、');
     tbody += `<tr class="${isCurrent?'is-current':''}">`;
     tbody += `<td class="col-year">${year}年${isCurrent?'(今年)':''}</td>`;
-    tbody += `<td class="col-assets ${r.assets<0?'minus':''}">${yen(r.assets)}</td>`;
+    tbody += `<td class="${r.cash<0?'minus':''}">${yen(r.cash)}</td>`;
+    tbody += `<td class="${r.stock<0?'minus':''}">${yen(r.stock)}</td>`;
+    tbody += `<td class="${r.total<0?'minus':''}">${yen(r.total)}</td>`;
     tbody += `<td class="col-event">${eventNames}</td>`;
     tbody += '</tr>';
   });
@@ -270,12 +343,16 @@ function renderTable(rows){
 }
 
 function renderSummary(rows){
-  document.getElementById('sumStart').textContent = yen(rows[0].assets);
+  const first = rows[0];
   const last = rows[rows.length-1];
+  document.getElementById('sumStart').textContent = yen(first.total);
   document.getElementById('sumEndLabel').textContent = `${last.offset}年後の予測資産`;
   const endEl = document.getElementById('sumEnd');
-  endEl.textContent = yen(last.assets);
-  endEl.className = 'value ' + (last.assets >= rows[0].assets ? 'plus' : 'minus');
+  endEl.textContent = yen(last.total);
+  endEl.className = 'value ' + (last.total >= first.total ? 'plus' : 'minus');
+
+  document.getElementById('bStart').textContent = `${yen(first.cash)} → ${yen(last.cash)}`;
+  document.getElementById('bStock').textContent = `${yen(first.stock)} → ${yen(last.stock)}`;
 }
 
 function render(){
@@ -287,15 +364,28 @@ function render(){
   renderTable(rows);
 }
 
-document.getElementById('currentAssetsInput').value = data.currentAssets;
-document.getElementById('annualContribInput').value = data.annualContrib;
-document.getElementById('annualRateInput').value = data.annualRate;
+document.getElementById('cashAssetsInput').value = data.cashAssets;
+document.getElementById('cashContribInput').value = data.cashContrib;
+document.getElementById('cashRateInput').value = data.cashRate;
+document.getElementById('stockAssetsInput').value = data.stockAssets;
+document.getElementById('stockContribInput').value = data.stockContrib;
+document.getElementById('stockRateInput').value = data.stockRate;
 document.getElementById('simYearsInput').value = data.simYears;
 
-document.getElementById('currentAssetsInput').addEventListener('input', e=>{ data.currentAssets = e.target.value; saveData(); render(); });
-document.getElementById('annualContribInput').addEventListener('input', e=>{ data.annualContrib = e.target.value; saveData(); render(); });
-document.getElementById('annualRateInput').addEventListener('input', e=>{ data.annualRate = e.target.value; saveData(); render(); });
-document.getElementById('simYearsInput').addEventListener('input', e=>{ data.simYears = parseInt(e.target.value)||30; saveData(); render(); });
+function bind(id, field, isInt){
+  document.getElementById(id).addEventListener('input', e=>{
+    data[field] = isInt ? (parseInt(e.target.value)||30) : e.target.value;
+    saveData();
+    render();
+  });
+}
+bind('cashAssetsInput','cashAssets');
+bind('cashContribInput','cashContrib');
+bind('cashRateInput','cashRate');
+bind('stockAssetsInput','stockAssets');
+bind('stockContribInput','stockContrib');
+bind('stockRateInput','stockRate');
+bind('simYearsInput','simYears', true);
 
 render();
 </script>
