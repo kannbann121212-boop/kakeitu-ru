@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>家計のバランスシート</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='8' y='8' width='112' height='112' rx='25' fill='%232c3e50'/%3E%3Crect x='32' y='76' width='16' height='24' rx='4' fill='%238ba888'/%3E%3Crect x='56' y='60' width='16' height='40' rx='4' fill='%238ba888'/%3E%3Crect x='80' y='44' width='16' height='56' rx='4' fill='%238ba888'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="バランスシート">
+<meta name="theme-color" content="#2c3e50">
+<style>
+  :root {
+    --navy: #2c3e50;
+    --navy-light: #46617a;
+    --sage: #8ba888;
+    --sage-light: #eaf0e8;
+    --coral: #d9764a;
+    --coral-light: #fbe9e0;
+    --gold: #c9a227;
+    --gold-light: #f7edc9;
+    --cream: #f5f1e8;
+    --cream-dark: #ece5d5;
+    --ink: #2c2a26;
+    --line: #ddd4c0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--cream); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { padding: 8px 2px 16px; border-bottom: 2px solid var(--navy); margin-bottom: 20px; }
+  header h1 { font-size: 21px; margin: 0; color: var(--navy); letter-spacing: 0.02em; }
+
+  section { margin-bottom: 18px; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--cream-dark); border-bottom: 1px solid var(--line); }
+  .section-head h2 { font-size: 14.5px; margin: 0; color: var(--navy); }
+  .section-head .subtotal { font-size: 12.5px; font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; }
+  .assets .section-head { background: var(--sage-light); }
+  .liabilities .section-head { background: var(--coral-light); }
+
+  .subhead {
+    font-size: 11.5px; font-weight: 700; color: var(--navy-light);
+    padding: 12px 14px 4px; letter-spacing: 0.03em;
+  }
+  .sub-subtotal { font-weight: 400; color: #8a8272; float: right; }
+
+  .rows { list-style: none; margin: 0; padding: 2px 8px 6px; }
+  .row { display: flex; align-items: center; gap: 5px; padding: 7px 4px; border-bottom: 1px solid #f0ece1; }
+  .row:last-child { border-bottom: none; }
+  .row input[type="text"] {
+    flex: 1 1 auto; min-width: 0; border: none; background: transparent;
+    font-size: 13.5px; padding: 6px 3px; color: var(--ink); border-bottom: 1px solid transparent;
+  }
+  .row input[type="text"]:focus { outline: none; border-bottom: 1px solid var(--navy-light); }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .row input.amount {
+    flex: none; width: 90px; border: none; background: var(--cream); border-radius: 6px;
+    font-size: 13.5px; padding: 6px 6px; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .row input.amount:focus { outline: 1px solid var(--navy-light); }
+  .row .unit { flex: none; font-size: 11.5px; color: #8a8272; }
+  .row button.del {
+    flex: none; border: none; background: none; color: #b7ab90;
+    font-size: 16px; line-height: 1; cursor: pointer; padding: 4px 2px;
+  }
+  .row button.del:hover { color: var(--coral); }
+
+  .add-row {
+    display: block; width: calc(100% - 16px); margin: 6px 8px 12px; padding: 8px;
+    border: 1px dashed var(--line); border-radius: 8px; background: none;
+    color: var(--navy-light); font-size: 12.5px; cursor: pointer;
+  }
+  .add-row:hover { background: var(--cream); }
+
+  .total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px; border-top: 1px solid var(--line); background: var(--cream-dark);
+    font-size: 13.5px; font-weight: 700; color: var(--navy);
+  }
+
+  .summary { background: var(--navy); color: var(--cream); border-radius: 10px; padding: 18px 16px; }
+  .summary h2 { font-size: 14px; margin: 0 0 14px; color: var(--gold-light); font-weight: 600; }
+  .summary .line { display: flex; justify-content: space-between; font-size: 13.5px; padding: 6px 0; border-bottom: 1px solid rgba(245,241,232,0.12); }
+  .summary .line:last-child { border-bottom: none; }
+  .summary .line span:last-child { font-variant-numeric: tabular-nums; }
+  .summary .line.total { font-size: 18px; font-weight: 700; padding-top: 12px; color: var(--gold-light); }
+  .summary .line.total.minus { color: #f0a184; }
+
+  footer { text-align: center; font-size: 11px; color: #a89f8a; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header><h1>家計のバランスシート</h1></header>
+
+  <section class="assets">
+    <div class="section-head">
+      <h2>資産</h2>
+      <div class="subtotal" id="assetsSubtotal">¥0</div>
+    </div>
+
+    <div class="subhead">流動資産</div>
+    <ul class="rows" id="liquidAssetRows"></ul>
+    <button class="add-row" id="addLiquidAsset">＋ 項目を追加</button>
+
+    <div class="subhead">固定資産</div>
+    <ul class="rows" id="fixedAssetRows"></ul>
+    <button class="add-row" id="addFixedAsset">＋ 項目を追加</button>
+  </section>
+
+  <section class="liabilities">
+    <div class="section-head">
+      <h2>負債</h2>
+      <div class="subtotal" id="liabilitiesSubtotal">¥0</div>
+    </div>
+
+    <div class="subhead">流動負債</div>
+    <ul class="rows" id="liquidLiabilityRows"></ul>
+    <button class="add-row" id="addLiquidLiability">＋ 項目を追加</button>
+
+    <div class="subhead">固定負債</div>
+    <ul class="rows" id="fixedLiabilityRows"></ul>
+    <button class="add-row" id="addFixedLiability">＋ 項目を追加</button>
+  </section>
+
+  <div class="summary">
+    <h2>純資産</h2>
+    <div class="line"><span>資産合計</span><span id="sumAssets">¥0</span></div>
+    <div class="line"><span>負債合計</span><span id="sumLiabilities">¥0</span></div>
+    <div class="line total" id="sumNetLine"><span>純資産（資産－負債）</span><span id="sumNet">¥0</span></div>
+  </div>
+
+  <footer>家計のバランスシート ・ すべてのデータはこの端末内に保存されます</footer>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'kakei-balance-sheet-v1';
+
+const defaultData = {
+  liquidAssets: [
+    { name:'現金', amount:null },
+    { name:'普通預金', amount:null },
+    { name:'定期預金', amount:null },
+    { name:'債券', amount:null },
+    { name:'投資信託', amount:null },
+    { name:'株式', amount:null }
+  ],
+  fixedAssets: [
+    { name:'iDeCo', amount:null },
+    { name:'終身保険', amount:null },
+    { name:'自動車', amount:null },
+    { name:'住宅', amount:null }
+  ],
+  liquidLiabilities: [
+    { name:'クレジットカード', amount:null },
+    { name:'カードローン', amount:null }
+  ],
+  fixedLiabilities: [
+    { name:'奨学金', amount:null },
+    { name:'自動車ローン', amount:null },
+    { name:'住宅ローン', amount:null }
+  ]
+};
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return structuredClone(defaultData);
+    const parsed = JSON.parse(raw);
+    return { ...structuredClone(defaultData), ...parsed };
+  }catch(e){ return structuredClone(defaultData); }
+}
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+let state = load();
+const fmt = (n) => '¥' + Math.round(n||0).toLocaleString('ja-JP');
+
+function renderRows(containerId, list){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  list.forEach((item, idx)=>{
+    const row = document.createElement('li');
+    row.className = 'row';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = item.name;
+    nameInput.placeholder = '項目名';
+    nameInput.addEventListener('input', e=>{ item.name = e.target.value; save(); });
+
+    const amountInput = document.createElement('input');
+    amountInput.type = 'number';
+    amountInput.className = 'amount';
+    amountInput.inputMode = 'numeric';
+    amountInput.step = '10000';
+    amountInput.placeholder = '0';
+    amountInput.value = (item.amount === null || item.amount === undefined) ? '' : item.amount;
+    amountInput.addEventListener('input', e=>{
+      item.amount = e.target.value === '' ? null : (parseFloat(e.target.value)||0);
+      save(); recalc();
+    });
+
+    const unit = document.createElement('span');
+    unit.className = 'unit';
+    unit.textContent = '円';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del';
+    delBtn.textContent = '×';
+    delBtn.addEventListener('click', ()=>{
+      list.splice(idx,1);
+      save(); render();
+    });
+
+    row.appendChild(nameInput);
+    row.appendChild(amountInput);
+    row.appendChild(unit);
+    row.appendChild(delBtn);
+    container.appendChild(row);
+  });
+}
+
+function total(list){
+  return list.reduce((s,i)=> s + (Number(i.amount)||0), 0);
+}
+
+function recalc(){
+  const liquidA = total(state.liquidAssets);
+  const fixedA = total(state.fixedAssets);
+  const liquidL = total(state.liquidLiabilities);
+  const fixedL = total(state.fixedLiabilities);
+  const assetsTotal = liquidA + fixedA;
+  const liabilitiesTotal = liquidL + fixedL;
+  const net = assetsTotal - liabilitiesTotal;
+
+  document.getElementById('assetsSubtotal').textContent = fmt(assetsTotal);
+  document.getElementById('liabilitiesSubtotal').textContent = fmt(liabilitiesTotal);
+  document.getElementById('sumAssets').textContent = fmt(assetsTotal);
+  document.getElementById('sumLiabilities').textContent = fmt(liabilitiesTotal);
+  const netEl = document.getElementById('sumNet');
+  netEl.textContent = fmt(net);
+  document.getElementById('sumNetLine').classList.toggle('minus', net < 0);
+
+  save();
+}
+
+function addItem(list){ list.push({ name:'', amount:null }); save(); render(); }
+
+document.getElementById('addLiquidAsset').addEventListener('click', ()=> addItem(state.liquidAssets));
+document.getElementById('addFixedAsset').addEventListener('click', ()=> addItem(state.fixedAssets));
+document.getElementById('addLiquidLiability').addEventListener('click', ()=> addItem(state.liquidLiabilities));
+document.getElementById('addFixedLiability').addEventListener('click', ()=> addItem(state.fixedLiabilities));
+
+function render(){
+  renderRows('liquidAssetRows', state.liquidAssets);
+  renderRows('fixedAssetRows', state.fixedAssets);
+  renderRows('liquidLiabilityRows', state.liquidLiabilities);
+  renderRows('fixedLiabilityRows', state.fixedLiabilities);
+  recalc();
+}
+
+render();
+</script>
+</body>
+</html>
