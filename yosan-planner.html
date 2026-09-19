@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>予算プランナー</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='8' y='8' width='112' height='112' rx='25' fill='%232c3e50'/%3E%3Crect x='32' y='76' width='16' height='24' rx='4' fill='%238ba888'/%3E%3Crect x='56' y='60' width='16' height='40' rx='4' fill='%238ba888'/%3E%3Crect x='80' y='44' width='16' height='56' rx='4' fill='%238ba888'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="予算プランナー">
+<meta name="theme-color" content="#2c3e50">
+<style>
+  :root {
+    --navy: #2c3e50;
+    --navy-light: #46617a;
+    --sage: #8ba888;
+    --sage-light: #eaf0e8;
+    --coral: #d9764a;
+    --coral-light: #fbe9e0;
+    --gold: #c9a227;
+    --gold-light: #f7edc9;
+    --cream: #f5f1e8;
+    --cream-dark: #ece5d5;
+    --ink: #2c2a26;
+    --line: #ddd4c0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--cream); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { padding: 8px 2px 16px; border-bottom: 2px solid var(--navy); margin-bottom: 16px; }
+  header h1 { font-size: 21px; margin: 0; color: var(--navy); letter-spacing: 0.02em; }
+
+  .project-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
+  .project-bar select {
+    flex: 1; min-width: 0; border: 1px solid var(--line); background: #fff; border-radius: 8px;
+    font-size: 13px; padding: 9px 8px; color: var(--navy); font-family: inherit; font-weight: 600;
+  }
+  .project-bar button {
+    flex: none; border: 1px solid var(--line); background: #fff; border-radius: 8px;
+    font-size: 15px; padding: 8px 10px; color: var(--navy-light); cursor: pointer;
+  }
+  .project-bar button:hover { background: var(--cream); }
+  .project-bar button.del-project:hover { color: var(--coral); border-color: var(--coral); }
+
+  section { margin-bottom: 18px; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--cream-dark); border-bottom: 1px solid var(--line); }
+  .section-head h2 { font-size: 14.5px; margin: 0; color: var(--navy); }
+  .section-head .count { font-size: 11.5px; color: #8a8272; }
+  .section-body { padding: 14px; }
+
+  input[type="number"], input[type="text"], input[type="date"], input[type="time"] { font-family: inherit; }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .field-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .field-row:last-child { margin-bottom: 0; }
+  .field-row label { font-size: 12.5px; color: var(--navy); flex-shrink: 0; }
+  .field-row .unit { font-size: 12px; color: #8a8272; flex-shrink: 0; }
+  .field-row input[type="text"] {
+    flex: 1; min-width: 0; border: none; background: var(--cream); border-radius: 6px;
+    font-size: 14px; padding: 8px 8px; color: var(--navy);
+  }
+  .field-row input[type="number"] {
+    flex: none; width: 130px; border: none; background: var(--cream); border-radius: 6px;
+    font-size: 14px; font-weight: 600; padding: 8px 8px; text-align: right; color: var(--navy);
+    font-variant-numeric: tabular-nums;
+  }
+  .field-row input:focus { outline: 1px solid var(--navy-light); }
+
+  .progress-wrap { margin-top: 4px; }
+  .progress-track { height: 10px; background: var(--cream); border-radius: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--sage); border-radius: 6px; transition: width 0.2s; }
+  .progress-fill.over { background: var(--coral); }
+  .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: #8a8272; margin-top: 4px; }
+
+  .item-card { border: 1px solid var(--line); background: var(--cream); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+  .item-card:last-child { margin-bottom: 0; }
+  .item-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .item-top input[type="text"] {
+    flex: 1; min-width: 0; border: none; background: #fff; border-radius: 6px;
+    font-size: 13px; padding: 7px 8px; color: var(--ink);
+  }
+  .item-top button.del {
+    flex: none; border: none; background: none; color: #b7ab90;
+    font-size: 16px; line-height: 1; cursor: pointer; padding: 4px 2px;
+  }
+  .item-top button.del:hover { color: var(--coral); }
+
+  .card-field-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 11.5px; color: #8a8272; }
+  .card-field-row:last-child { margin-bottom: 0; }
+  .card-field-row .field-label { flex-shrink: 0; width: 58px; }
+  .card-field-row input {
+    min-width: 0; flex: 1; border: none; background: #fff; border-radius: 6px;
+    font-size: 12.5px; padding: 7px 6px; color: var(--ink);
+  }
+  .card-field-row input[type="number"] { text-align: right; }
+  .card-field-row input[type="time"] { flex: none; width: 90px; text-align: center; }
+  .card-field-row .unit { flex-shrink: 0; font-size: 11px; color: #8a8272; }
+
+  .add-row {
+    display: block; width: 100%; margin-top: 4px; padding: 9px;
+    border: 1px dashed var(--line); border-radius: 8px; background: none;
+    color: var(--navy-light); font-size: 13px; cursor: pointer;
+  }
+  .add-row:hover { background: var(--cream); }
+  .empty-note { font-size: 12.5px; color: #8a8272; text-align: center; padding: 14px 4px; }
+
+  .schedule-group { margin-bottom: 14px; }
+  .schedule-group:last-child { margin-bottom: 0; }
+  .schedule-date {
+    font-size: 12px; font-weight: 700; color: var(--navy);
+    padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--line);
+  }
+  .schedule-row { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; font-size: 13px; }
+  .schedule-time { flex: none; width: 46px; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .schedule-time.notime { color: #c2b9a3; }
+  .schedule-name { flex: 1; min-width: 0; color: var(--ink); }
+  .schedule-amount { flex: none; color: #8a8272; font-variant-numeric: tabular-nums; }
+
+  .summary { background: var(--navy); color: var(--cream); border-radius: 10px; padding: 18px 16px; }
+  .summary h2 { font-size: 14px; margin: 0 0 14px; color: var(--gold-light); font-weight: 600; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .summary-box { background: rgba(245,241,232,0.08); border-radius: 8px; padding: 10px 12px; }
+  .summary-box .label { font-size: 11px; color: rgba(245,241,232,0.68); margin-bottom: 4px; }
+  .summary-box .value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .summary-box .value.over { color: #f0a184; }
+  .summary-box .value.under { color: var(--gold-light); }
+
+  footer { text-align: center; font-size: 11px; color: #a89f8a; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header><h1 id="pageTitle">予算プランナー</h1></header>
+
+  <div class="project-bar">
+    <select id="projectSelect"></select>
+    <button id="newProjectBtn" title="新規プラン">＋</button>
+    <button id="delProjectBtn" class="del-project" title="このプランを削除">×</button>
+  </div>
+
+  <section>
+    <div class="section-head"><h2>予算設定</h2></div>
+    <div class="section-body">
+      <div class="field-row">
+        <label>タイトル</label>
+        <input type="text" id="titleInput" placeholder="例: 推し活2026、沖縄旅行">
+      </div>
+      <div class="field-row">
+        <label>総予算</label>
+        <input type="number" inputmode="numeric" id="budgetInput" placeholder="0">
+        <span class="unit">円</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+        <div class="progress-labels"><span id="progressUsed">¥0 使用</span><span id="progressPct">0%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>項目</h2>
+      <span class="count" id="itemCount"></span>
+    </div>
+    <div class="section-body">
+      <div id="itemList"></div>
+      <div class="empty-note" id="emptyNote" style="display:none;">項目がありません。下のボタンから追加してください</div>
+      <button class="add-row" id="addItemBtn">＋ 項目を追加</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>スケジュール</h2></div>
+    <div class="section-body">
+      <div id="scheduleView"></div>
+      <div class="empty-note" id="scheduleEmptyNote" style="display:none;">日付を入力した項目がここに時系列で並びます</div>
+    </div>
+  </section>
+
+  <div class="summary">
+    <h2>サマリー</h2>
+    <div class="summary-grid">
+      <div class="summary-box">
+        <div class="label">項目 合計</div>
+        <div class="value" id="sumTotal">¥0</div>
+      </div>
+      <div class="summary-box">
+        <div class="label">残り予算</div>
+        <div class="value" id="sumRemaining">¥0</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>予算プランナー ・ すべてのデータはこの端末内に保存されます</footer>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'yosan-planner-v3';
+const OLD_KEY_V2 = 'yosan-planner-v2';
+const OLD_KEY_V1 = 'yosan-planner-v1';
+
+function newId(){ return 'p' + Date.now() + Math.random().toString(16).slice(2); }
+function blankProject(){ return { id: newId(), title: '', budget: null, items: [ { name:'', amount:null, date:'', time:'' } ] }; }
+
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.projects) && parsed.projects.length){
+        if(!parsed.currentId || !parsed.projects.find(p=>p.id===parsed.currentId)){
+          parsed.currentId = parsed.projects[0].id;
+        }
+        return parsed;
+      }
+    }
+  }catch(e){}
+
+  // v2(単一プラン)からの移行
+  try{
+    const rawV2 = localStorage.getItem(OLD_KEY_V2);
+    if(rawV2){
+      const old = JSON.parse(rawV2);
+      const proj = { id:newId(), title: old.title||'', budget: old.budget??null, items: old.items||[] };
+      return { projects:[proj], currentId: proj.id };
+    }
+  }catch(e){}
+  try{
+    const rawV1 = localStorage.getItem(OLD_KEY_V1);
+    if(rawV1){
+      const old = JSON.parse(rawV1);
+      const proj = {
+        id:newId(), title: old.title||'', budget: old.budget??null,
+        items: (old.items||[]).map(i=>({ name:i.name||'', amount:i.amount??null, date:i.date||'', time:i.time||'' }))
+      };
+      return { projects:[proj], currentId: proj.id };
+    }
+  }catch(e){}
+
+  const proj = blankProject();
+  return { projects:[proj], currentId: proj.id };
+}
+function saveStore(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); }
+
+let store = loadStore();
+function currentProject(){ return store.projects.find(p=>p.id===store.currentId); }
+
+const fmt = (n) => '¥' + Math.round(n||0).toLocaleString('ja-JP');
+function escapeAttr(str){ const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+function escapeHtml(str){ return escapeAttr(str); }
+
+function renderProjectSelect(){
+  const sel = document.getElementById('projectSelect');
+  sel.innerHTML = store.projects.map(p =>
+    `<option value="${p.id}" ${p.id===store.currentId?'selected':''}>${escapeHtml(p.title.trim() || '無題のプラン')}</option>`
+  ).join('');
+  document.getElementById('delProjectBtn').disabled = store.projects.length <= 1;
+  document.getElementById('delProjectBtn').style.opacity = store.projects.length <= 1 ? '0.4' : '1';
+}
+
+document.getElementById('projectSelect').addEventListener('change', e=>{
+  store.currentId = e.target.value;
+  saveStore();
+  renderAll();
+});
+document.getElementById('newProjectBtn').addEventListener('click', ()=>{
+  const proj = blankProject();
+  store.projects.push(proj);
+  store.currentId = proj.id;
+  saveStore();
+  renderAll();
+});
+document.getElementById('delProjectBtn').addEventListener('click', ()=>{
+  if(store.projects.length <= 1) return;
+  const proj = currentProject();
+  if(!confirm(`「${proj.title.trim() || '無題のプラン'}」を削除します。よろしいですか?`)) return;
+  store.projects = store.projects.filter(p=>p.id!==store.currentId);
+  store.currentId = store.projects[0].id;
+  saveStore();
+  renderAll();
+});
+
+function sortItems(){
+  const proj = currentProject();
+  proj.items.sort((a,b)=>{
+    const ad = a.date || '9999-99-99';
+    const bd = b.date || '9999-99-99';
+    if(ad !== bd) return ad.localeCompare(bd);
+    const at = a.time || '99:99';
+    const bt = b.time || '99:99';
+    return at.localeCompare(bt);
+  });
+}
+
+function renderHeader(){
+  const proj = currentProject();
+  document.getElementById('titleInput').value = proj.title;
+  document.getElementById('budgetInput').value = proj.budget===null ? '' : proj.budget;
+  document.getElementById('pageTitle').textContent = proj.title.trim() || '予算プランナー';
+}
+
+document.getElementById('titleInput').addEventListener('input', e=>{
+  const proj = currentProject();
+  proj.title = e.target.value;
+  document.getElementById('pageTitle').textContent = proj.title.trim() || '予算プランナー';
+  saveStore();
+  renderProjectSelect();
+});
+document.getElementById('budgetInput').addEventListener('input', e=>{
+  const proj = currentProject();
+  proj.budget = e.target.value===''?null:(parseFloat(e.target.value)||0);
+  saveStore(); recalc();
+});
+
+function renderList(){
+  const proj = currentProject();
+  const container = document.getElementById('itemList');
+  container.innerHTML = '';
+  document.getElementById('emptyNote').style.display = proj.items.length ? 'none' : 'block';
+  document.getElementById('itemCount').textContent = proj.items.length ? proj.items.length + '件' : '';
+
+  proj.items.forEach((item, idx)=>{
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-top">
+        <input type="text" class="f-name" value="${escapeAttr(item.name)}" placeholder="項目名(例: ライブチケット、ホテル代)" maxlength="24">
+        <button class="del">×</button>
+      </div>
+      <div class="card-field-row">
+        <span class="field-label">金額</span>
+        <input type="number" inputmode="numeric" class="f-amount" value="${item.amount===null?'':item.amount}" placeholder="0">
+        <span class="unit">円</span>
+      </div>
+      <div class="card-field-row">
+        <span class="field-label">日時</span>
+        <input type="date" class="f-date" value="${item.date||''}">
+        <input type="time" class="f-time" value="${item.time||''}">
+      </div>`;
+
+    const nameInput = card.querySelector('.f-name');
+    const amountInput = card.querySelector('.f-amount');
+    const dateInput = card.querySelector('.f-date');
+    const timeInput = card.querySelector('.f-time');
+    const delBtn = card.querySelector('.del');
+
+    nameInput.addEventListener('input', e=>{ item.name = e.target.value; saveStore(); renderSchedule(); });
+    amountInput.addEventListener('input', e=>{
+      item.amount = e.target.value===''?null:(parseFloat(e.target.value)||0);
+      saveStore(); recalc(); renderSchedule();
+    });
+    dateInput.addEventListener('input', e=>{ item.date = e.target.value; saveStore(); renderAll(); });
+    timeInput.addEventListener('input', e=>{ item.time = e.target.value; saveStore(); renderAll(); });
+    delBtn.addEventListener('click', ()=>{ proj.items.splice(idx,1); saveStore(); renderAll(); });
+
+    container.appendChild(card);
+  });
+}
+
+function renderSchedule(){
+  const proj = currentProject();
+  const dated = proj.items.filter(i => i.date && i.name);
+  const view = document.getElementById('scheduleView');
+  document.getElementById('scheduleEmptyNote').style.display = dated.length ? 'none' : 'block';
+
+  const byDate = {};
+  dated.forEach(i=>{
+    if(!byDate[i.date]) byDate[i.date] = [];
+    byDate[i.date].push(i);
+  });
+  const dates = Object.keys(byDate).sort();
+
+  view.innerHTML = dates.map(date=>{
+    const items = byDate[date].slice().sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+    const d = new Date(date + 'T00:00:00');
+    const label = `${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`;
+    const rows = items.map(i=>`
+      <div class="schedule-row">
+        <span class="schedule-time ${i.time?'':'notime'}">${i.time || '--:--'}</span>
+        <span class="schedule-name">${escapeHtml(i.name)}</span>
+        <span class="schedule-amount">${i.amount!=null ? fmt(i.amount) : ''}</span>
+      </div>`).join('');
+    return `<div class="schedule-group"><div class="schedule-date">${label}</div>${rows}</div>`;
+  }).join('');
+}
+
+function recalc(){
+  const proj = currentProject();
+  const budget = Number(proj.budget) || 0;
+  const total = proj.items.reduce((s,i)=> s + (Number(i.amount)||0), 0);
+  const remaining = budget - total;
+  const pct = budget > 0 ? Math.min(999, Math.round((total/budget)*100)) : 0;
+
+  document.getElementById('sumTotal').textContent = fmt(total);
+  const remEl = document.getElementById('sumRemaining');
+  remEl.textContent = fmt(remaining);
+  remEl.className = 'value ' + (remaining < 0 ? 'over' : 'under');
+
+  const fill = document.getElementById('progressFill');
+  fill.style.width = Math.min(100, pct) + '%';
+  fill.classList.toggle('over', total > budget && budget > 0);
+  document.getElementById('progressUsed').textContent = `${fmt(total)} 使用`;
+  document.getElementById('progressPct').textContent = budget > 0 ? pct + '%' : '';
+
+  saveStore();
+}
+
+document.getElementById('addItemBtn').addEventListener('click', ()=>{
+  const proj = currentProject();
+  proj.items.push({ name:'', amount:null, date:'', time:'' });
+  saveStore(); renderAll();
+});
+
+function renderAll(){
+  sortItems();
+  renderProjectSelect();
+  renderHeader();
+  renderList();
+  renderSchedule();
+  recalc();
+}
+
+renderAll();
+</script>
+</body>
+</html>
