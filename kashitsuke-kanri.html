@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>貸付の管理</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='8' y='8' width='112' height='112' rx='25' fill='%232c3e50'/%3E%3Crect x='32' y='76' width='16' height='24' rx='4' fill='%238ba888'/%3E%3Crect x='56' y='60' width='16' height='40' rx='4' fill='%238ba888'/%3E%3Crect x='80' y='44' width='16' height='56' rx='4' fill='%238ba888'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="貸付の管理">
+<meta name="theme-color" content="#2c3e50">
+<style>
+  :root {
+    --navy: #2c3e50;
+    --navy-light: #46617a;
+    --sage: #8ba888;
+    --sage-light: #eaf0e8;
+    --coral: #d9764a;
+    --coral-light: #fbe9e0;
+    --gold: #c9a227;
+    --gold-light: #f7edc9;
+    --cream: #f5f1e8;
+    --cream-dark: #ece5d5;
+    --ink: #2c2a26;
+    --line: #ddd4c0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--cream); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { padding: 8px 2px 16px; border-bottom: 2px solid var(--navy); margin-bottom: 20px; }
+  header h1 { font-size: 21px; margin: 0; color: var(--navy); letter-spacing: 0.02em; }
+
+  .overall-summary {
+    background: var(--navy); color: var(--cream); border-radius: 10px; padding: 16px 14px; margin-bottom: 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .overall-summary .label { font-size: 12px; color: rgba(245,241,232,0.68); }
+  .overall-summary .value { font-size: 20px; font-weight: 700; color: var(--gold-light); font-variant-numeric: tabular-nums; }
+
+  section { margin-bottom: 18px; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--cream-dark); border-bottom: 1px solid var(--line); }
+  .section-head h2 { font-size: 14.5px; margin: 0; color: var(--navy); }
+  .section-body { padding: 14px; }
+
+  input[type="number"], input[type="text"] { font-family: inherit; }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .loan-edit-card {
+    border: 1px solid var(--line); background: var(--cream); border-radius: 8px; padding: 10px; margin-bottom: 8px;
+  }
+  .loan-edit-card:last-child { margin-bottom: 0; }
+  .loan-edit-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .loan-edit-top input[type="text"] {
+    flex: 1; min-width: 0; border: none; background: #fff; border-radius: 6px;
+    font-size: 13px; padding: 7px 8px; color: var(--ink);
+  }
+  .loan-edit-top button.del {
+    flex: none; border: 1px solid var(--line); background: #fff; color: var(--coral);
+    font-size: 11.5px; line-height: 1; cursor: pointer; padding: 7px 10px; border-radius: 6px;
+    white-space: nowrap;
+  }
+  .loan-edit-top button.del:hover { background: var(--coral-light); }
+  .loan-edit-top button.del.confirming { background: var(--coral); color: #fff; border-color: var(--coral); }
+  .loan-edit-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 11.5px; color: #8a8272; }
+  .loan-edit-row:last-child { margin-bottom: 0; }
+  .loan-edit-row .f-label { flex-shrink: 0; width: 92px; }
+  .loan-edit-row input {
+    min-width: 0; flex: 1; border: none; background: #fff; border-radius: 6px;
+    font-size: 12.5px; padding: 7px 6px; color: var(--ink);
+  }
+  .loan-edit-row input[type="number"] { text-align: right; }
+  .loan-edit-row .unit { flex-shrink: 0; font-size: 11px; color: #8a8272; }
+
+  .add-row {
+    display: block; width: 100%; margin-top: 4px; padding: 9px;
+    border: 1px dashed var(--line); border-radius: 8px; background: none;
+    color: var(--navy-light); font-size: 13px; cursor: pointer;
+  }
+  .add-row:hover { background: var(--cream); }
+
+  .reset-note { font-size: 11px; color: #8a8272; text-align: right; margin-top: 6px; }
+  .reset-note button { border: none; background: none; color: var(--navy-light); text-decoration: underline; font-size: 11px; cursor: pointer; padding: 0; }
+
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.compare { border-collapse: collapse; width: 100%; font-size: 11.5px; }
+  table.compare th, table.compare td { padding: 6px 5px; text-align: right; white-space: nowrap; border-bottom: 1px solid #f0ece1; }
+  table.compare th { font-size: 10px; color: var(--navy-light); font-weight: 700; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; }
+  table.compare .col-date, table.compare th.col-date { text-align: left; position: sticky; left: 0; background: #fff; z-index: 1; }
+  table.compare th.loan-head { text-align: center; border-left: 2px solid var(--line); color: var(--navy); font-size: 11px; }
+  table.compare td.first-col-of-loan, table.compare th.first-col-of-loan { border-left: 2px solid var(--line); }
+  table.compare .dash { color: #ddd4c0; }
+  table.compare .paid-check { width: 15px; height: 15px; vertical-align: middle; }
+  table.compare td.pay-cell { color: var(--navy-light); text-decoration: underline dashed; text-underline-offset: 2px; cursor: pointer; }
+  table.compare td.pay-cell.override { font-weight: 700; color: var(--gold); }
+  table.compare tr.today-row td { background: var(--gold-light); }
+
+  .legend-note { font-size: 11px; color: #8a8272; text-align: center; margin-top: 10px; line-height: 1.7; }
+  .empty-note { font-size: 12.5px; color: #8a8272; text-align: center; padding: 14px 4px; }
+
+  footer { text-align: center; font-size: 11px; color: #a89f8a; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header><h1>貸付の管理</h1></header>
+
+  <div class="overall-summary">
+    <span class="label">貸付残高 合計</span>
+    <span class="value" id="grandTotal">¥0</span>
+  </div>
+
+  <section>
+    <div class="section-head"><h2>貸付一覧</h2></div>
+    <div class="section-body">
+      <div id="loanEditList"></div>
+      <button class="add-row" id="addLoanBtn">＋ 貸付を追加</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>回収スケジュール</h2></div>
+    <div class="section-body">
+      <div class="table-wrap">
+        <table class="compare" id="compareTable"></table>
+      </div>
+      <div class="empty-note" id="compareEmptyNote" style="display:none;">貸付総額と月々の返済予定額を入力した貸付が、年月を揃えて横に並びます</div>
+      <div class="legend-note">金色の行は今月です／返済額をタップするとその月だけ編集できます</div>
+    </div>
+  </section>
+
+  <footer>貸付の管理 ・ すべてのデータはこの端末内に保存されます</footer>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'kashitsuke-kanri-v2';
+const OLD_KEY_V1 = 'kashitsuke-kanri-v1';
+
+function newId(){ return 'l' + Date.now() + Math.random().toString(16).slice(2); }
+function blankLoan(){
+  const now = new Date();
+  return {
+    id:newId(), name:'', principal:null, monthly:null,
+    startMonth: now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0"),
+    overrides:{}, paidMonths:{}
+  };
+}
+
+function storageGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function storageSet(key, value){ try{ localStorage.setItem(key, value); }catch(e){} }
+
+function loadStore(){
+  try{
+    const raw = storageGet(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.loans) && parsed.loans.length) return parsed;
+    }
+  }catch(e){}
+  try{
+    const rawOld = storageGet(OLD_KEY_V1);
+    if(rawOld){
+      const old = JSON.parse(rawOld);
+      if(old && Array.isArray(old.loans) && old.loans.length){
+        old.loans.forEach(l => { if(!l.overrides) l.overrides={}; if(!l.paidMonths) l.paidMonths={}; });
+        return { loans: old.loans };
+      }
+    }
+  }catch(e){}
+  return { loans:[blankLoan()] };
+}
+function saveStore(){ storageSet(STORAGE_KEY, JSON.stringify(store)); }
+
+let store = loadStore();
+function escapeHtml(str){ const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+function fmt(n){ return '¥' + Math.round(n||0).toLocaleString('ja-JP'); }
+
+function computeSchedule(loan){
+  let balance = parseFloat(loan.principal) || 0;
+  const monthly = parseFloat(loan.monthly) || 0;
+  if(balance <= 0 || monthly <= 0) return null;
+
+  let startDate;
+  if(loan.startMonth){
+    const [y,m] = loan.startMonth.split("-").map(Number);
+    startDate = new Date(y, m-1, 1);
+  } else {
+    startDate = new Date();
+  }
+
+  const byKey = {};
+  let count = 0;
+  const maxRows = 600;
+  while(balance > 0 && count < maxRows){
+    count++;
+    const d = new Date(startDate.getFullYear(), startDate.getMonth() + count - 1, 1);
+    const key = `${d.getFullYear()}-${d.getMonth()+1}`;
+    const isOverride = loan.overrides.hasOwnProperty(key);
+    let payment = isOverride ? parseFloat(loan.overrides[key]) : monthly;
+    if(payment >= balance) payment = balance;
+    balance = Math.round((balance - payment) * 100) / 100;
+    byKey[key] = { key, year:d.getFullYear(), month:d.getMonth()+1, payment, balance, isOverride, isPaid: !!loan.paidMonths[key] };
+  }
+  return byKey;
+}
+
+function renderLoanEditList(){
+  const container = document.getElementById('loanEditList');
+  container.innerHTML = '';
+  store.loans.forEach((loan, idx)=>{
+    const card = document.createElement('div');
+    card.className = 'loan-edit-card';
+    card.innerHTML = `
+      <div class="loan-edit-top">
+        <input type="text" class="f-name" value="${escapeHtml(loan.name)}" placeholder="貸付先(例: 妹、友人A)">
+        <button class="del">削除</button>
+      </div>
+      <div class="loan-edit-row">
+        <span class="f-label">貸付総額</span>
+        <input type="number" inputmode="numeric" class="f-principal" value="${loan.principal===null?'':loan.principal}" placeholder="0">
+        <span class="unit">円</span>
+      </div>
+      <div class="loan-edit-row">
+        <span class="f-label">月々の返済予定額</span>
+        <input type="number" inputmode="numeric" class="f-monthly" value="${loan.monthly===null?'':loan.monthly}" placeholder="0">
+        <span class="unit">円</span>
+      </div>
+      <div class="loan-edit-row">
+        <span class="f-label">返済開始月</span>
+        <input type="month" class="f-start" value="${loan.startMonth||''}">
+      </div>`;
+
+    card.querySelector('.f-name').addEventListener('input', e=>{ loan.name = e.target.value; saveStore(); updateDerived(); });
+    card.querySelector('.f-principal').addEventListener('input', e=>{
+      loan.principal = e.target.value===''?null:(parseFloat(e.target.value)||0);
+      saveStore(); updateDerived();
+    });
+    card.querySelector('.f-monthly').addEventListener('input', e=>{
+      loan.monthly = e.target.value===''?null:(parseFloat(e.target.value)||0);
+      saveStore(); updateDerived();
+    });
+    card.querySelector('.f-start').addEventListener('input', e=>{ loan.startMonth = e.target.value; saveStore(); updateDerived(); });
+    card.querySelector('.del').addEventListener('click', (e)=>{
+      const btn = e.currentTarget;
+      if(!btn.classList.contains('confirming')){
+        btn.classList.add('confirming');
+        btn.textContent = 'もう一度押して削除';
+        setTimeout(()=>{
+          if(btn.classList.contains('confirming')){
+            btn.classList.remove('confirming');
+            btn.textContent = '削除';
+          }
+        }, 3000);
+        return;
+      }
+      if(store.loans.length <= 1){ alert('最後の1件は削除できません'); return; }
+      store.loans.splice(idx,1);
+      saveStore(); renderAll();
+    });
+
+    container.appendChild(card);
+  });
+}
+
+document.getElementById('addLoanBtn').addEventListener('click', ()=>{
+  store.loans.push(blankLoan());
+  saveStore(); renderAll();
+});
+
+function renderCompareTable(){
+  const schedules = store.loans.map(loan => ({ loan, byKey: computeSchedule(loan) }));
+  const active = schedules.filter(s => s.byKey);
+  const table = document.getElementById('compareTable');
+  document.getElementById('compareEmptyNote').style.display = active.length ? 'none' : 'block';
+
+  if(!active.length){ table.innerHTML = ''; return; }
+
+  const allKeys = new Set();
+  active.forEach(s => Object.keys(s.byKey).forEach(k => allKeys.add(k)));
+  const sortedKeys = Array.from(allKeys).sort((a,b)=>{
+    const [ay,am] = a.split('-').map(Number);
+    const [by,bm] = b.split('-').map(Number);
+    return (ay*12+am) - (by*12+bm);
+  });
+
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${now.getMonth()+1}`;
+
+  let thead = '<thead><tr><th class="col-date" rowspan="2">年月</th>';
+  active.forEach(s => { thead += `<th class="loan-head" colspan="3">${escapeHtml(s.loan.name.trim() || '無題の貸付')}</th>`; });
+  thead += '</tr><tr>';
+  active.forEach(() => { thead += `<th class="first-col-of-loan">済</th><th>返済額</th><th>残高</th>`; });
+  thead += '</tr></thead>';
+
+  let tbody = '<tbody>';
+  sortedKeys.forEach(key=>{
+    const [y,m] = key.split('-').map(Number);
+    const isToday = key === todayKey;
+    tbody += `<tr class="${isToday?'today-row':''}"><td class="col-date">${y}年${m}月</td>`;
+    active.forEach(s=>{
+      const r = s.byKey[key];
+      if(!r){
+        tbody += `<td class="first-col-of-loan dash">-</td><td class="dash">-</td><td class="dash">-</td>`;
+      }else{
+        tbody += `<td class="first-col-of-loan"><input type="checkbox" class="paid-check" data-loan="${s.loan.id}" data-key="${key}" ${r.isPaid?'checked':''}></td>`;
+        tbody += `<td class="pay-cell${r.isOverride?' override':''}" data-loan="${s.loan.id}" data-key="${key}">${Math.round(r.payment).toLocaleString()}</td>`;
+        tbody += `<td>${Math.round(r.balance).toLocaleString()}</td>`;
+      }
+    });
+    tbody += '</tr>';
+  });
+  tbody += '</tbody>';
+
+  table.innerHTML = thead + tbody;
+
+  table.querySelectorAll('.paid-check').forEach(box=>{
+    box.addEventListener('change', ()=>{
+      const loan = store.loans.find(l=>l.id===box.dataset.loan);
+      const key = box.dataset.key;
+      if(box.checked) loan.paidMonths[key] = true; else delete loan.paidMonths[key];
+      saveStore(); renderAll();
+    });
+  });
+  table.querySelectorAll('.pay-cell').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      const loan = store.loans.find(l=>l.id===cell.dataset.loan);
+      const key = cell.dataset.key;
+      const current = loan.overrides[key] || '';
+      const input = prompt('この月の返済額を入力(空欄で通常額に戻す)', current);
+      if(input === null) return;
+      const trimmed = input.trim();
+      if(trimmed === ''){ delete loan.overrides[key]; }
+      else{
+        const num = parseFloat(trimmed);
+        if(isNaN(num) || num <= 0){ alert('正しい金額を入力してください'); return; }
+        loan.overrides[key] = num;
+      }
+      saveStore(); renderAll();
+    });
+  });
+}
+
+function renderGrandTotal(){
+  let total = 0;
+  store.loans.forEach(loan=>{
+    const byKey = computeSchedule(loan);
+    if(byKey){
+      const unpaidRows = Object.values(byKey).filter(r=>!r.isPaid).sort((a,b)=>(a.year*12+a.month)-(b.year*12+b.month));
+      if(unpaidRows.length) total += unpaidRows[0].balance + unpaidRows[0].payment;
+    }else{
+      total += parseFloat(loan.principal)||0;
+    }
+  });
+  document.getElementById('grandTotal').textContent = fmt(total);
+}
+
+function renderAll(){
+  renderLoanEditList();
+  renderCompareTable();
+  renderGrandTotal();
+  saveStore();
+}
+
+function updateDerived(){
+  renderCompareTable();
+  renderGrandTotal();
+}
+
+renderAll();
+</script>
+</body>
+</html>
