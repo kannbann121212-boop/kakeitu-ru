@@ -460,7 +460,17 @@ function escapeAttr(str){
   return div.innerHTML;
 }
 
+function sortItemsByPayday(){
+  const payday = paydayValue();
+  state.items.sort((a,b)=>{
+    const ao = payday===null ? (parseInt(a.day)||1) : cycleOrder(a.day, payday);
+    const bo = payday===null ? (parseInt(b.day)||1) : cycleOrder(b.day, payday);
+    return ao - bo;
+  });
+}
+
 function renderItemList(){
+  sortItemsByPayday();
   const container = document.getElementById('itemList');
   container.innerHTML = '';
   document.getElementById('emptyNote').style.display = state.items.length ? 'none' : 'block';
@@ -615,6 +625,7 @@ document.getElementById('paydayInput').value = state.payday;
 document.getElementById('paydayInput').addEventListener('input', e=>{
   state.payday = e.target.value;
   saveState();
+  renderItemList();
   renderBalanceCheck();
   renderTotals();
 });
@@ -624,6 +635,7 @@ document.getElementById('paydayInput').addEventListener('blur', e=>{
   state.payday = v;
   e.target.value = v;
   saveState();
+  renderItemList();
   renderBalanceCheck();
   renderTotals();
 });
